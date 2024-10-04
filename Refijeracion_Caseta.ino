@@ -42,7 +42,7 @@ void loop() {
     Serial.print(temperature);
     Serial.print(" °C, Humedad: ");
     Serial.print(humidity);
-    Serial.println(" %");
+    Serial.println(" % ");
     
     // Si el sensor vuelve a funcionar, apaga el LED y reinicia la variable
     digitalWrite(LED_PIN, LOW);
