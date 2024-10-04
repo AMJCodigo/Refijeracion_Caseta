@@ -28,7 +28,7 @@ void loop() {
 
     Serial.println("Fallo sensor DHT11");
     digitalWrite(RELAY_PIN, LOW);
-      {for (int i = 0; i < 100; i++) {
+      {for (int i = 0; i < 50; i++) {
     digitalWrite(LED_PIN, HIGH); // Enciende el LED
     delay(50); // Espera 100 milisegundos
     digitalWrite(LED_PIN, LOW); // Apaga el LED
