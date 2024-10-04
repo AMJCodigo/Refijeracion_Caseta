@@ -55,19 +55,19 @@ void loop() {
     // Si el sensor vuelve a funcionar, apaga el LED y reinicia la variable
     digitalWrite(LED_PIN, LOW);
     
-    if (temperature >= 25) {
+    if (temperature >= 22) {
       if (!relayOn) {
         relayOn = true;
         relayStartTime = millis();
         digitalWrite(RELAY_PIN, HIGH);
       }
-    } else if (temperature <= 24 && relayOn) {
+    } else if (temperature <= 21 && relayOn) {
       unsigned long elapsedTime = (millis() - relayStartTime) / 60000; // Convertir a minutos
       unsigned long remainingTime = 30 - elapsedTime;
       Serial.print("Minutos restantes: ");
       Serial.println(remainingTime);
       
-      if (elapsedTime >= 30) {
+      if (elapsedTime >= 15) {
         relayOn = false;
         digitalWrite(RELAY_PIN, LOW);
       }
@@ -75,11 +75,11 @@ void loop() {
     
     if (relayOn) {
       unsigned long elapsedTime = (millis() - relayStartTime) / 60000; // Convertir a minutos
-      unsigned long remainingTime = 30 - elapsedTime;
+      unsigned long remainingTime = 15 - elapsedTime;
 
       digitalWrite(RELAY_PIN, HIGH);
       
-      if (elapsedTime >= 30) {
+      if (elapsedTime >= 15) {
         relayOn = false;
         digitalWrite(RELAY_PIN, LOW);
       }
