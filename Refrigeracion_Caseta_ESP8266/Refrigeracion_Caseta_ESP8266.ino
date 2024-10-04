@@ -30,9 +30,9 @@ void loop() {
     digitalWrite(RELAY_PIN, LOW);
       {for (int i = 0; i < 50; i++) {
     digitalWrite(LED_PIN, HIGH); // Enciende el LED
-    delay(50); // Espera 100 milisegundos
+    delay(50); // Espera 50 milisegundos
     digitalWrite(LED_PIN, LOW); // Apaga el LED
-    delay(50); // Espera 100 milisegundos
+    delay(50); // Espera 50 milisegundos
   }
 
 }
@@ -45,7 +45,7 @@ void loop() {
     Serial.print(humidity);
     Serial.println(" % ");
     
-    // Si el sensor vuelve a funcionar, apaga el LED y reinicia la variable
+    // Si el sensor vuelve a funcionar, apaga el LED
     digitalWrite(LED_PIN, LOW);
     
     if (temperature >= 22) {
