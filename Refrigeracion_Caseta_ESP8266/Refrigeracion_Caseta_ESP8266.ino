@@ -1,15 +1,6 @@
-#include <DHT.h>
 
-#define DHTPIN 2     // Pin donde está conectado el sensor DHT11
-#define DHTTYPE DHT11   // Definimos el tipo de sensor DHT
-#define RELAY_PIN 4   // Pin donde está conectado el relé
-#define LED_PIN 0    // Pin donde está conectado el LED
-
-
-DHT dht(DHTPIN, DHTTYPE);
-
-unsigned long relayStartTime = 0;
-bool relayOn = false;
+#include "001_Globales.h"
+#include "002_Conectar_Internet.h"
 
 
 void setup() {
@@ -17,6 +8,8 @@ void setup() {
   pinMode(RELAY_PIN, OUTPUT);
   pinMode(LED_PIN, OUTPUT);
   dht.begin();
+
+  Conectar_Internet();
   
 }
 
