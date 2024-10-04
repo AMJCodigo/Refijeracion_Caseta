@@ -1,103 +1,81 @@
 #include <DHT.h>
-#include <DHT_U.h>
 
 #define DHTPIN 2     // Pin donde está conectado el sensor DHT11
-#define DHTTYPE DHT11   // Definimos el tipo de sensor DHT11
-#define RELAYPIN 3   // Pin donde está conectado el relé
-#define LEDPIN 13    // Pin donde está conectado el LED
+#define DHTTYPE DHT11   // Definimos el tipo de sensor DHT
+#define RELAY_PIN 3   // Pin donde está conectado el relé
+#define LED_PIN 13    // Pin donde está conectado el LED
+
 
 DHT dht(DHTPIN, DHTTYPE);
 
-unsigned long previousMillis = 0;
-const long interval = 1800000; // 30 minutos en milisegundos
+unsigned long relayStartTime = 0;
 bool relayOn = false;
-bool sensorError = false;
+
 
 void setup() {
   Serial.begin(9600);
+  pinMode(RELAY_PIN, OUTPUT);
+  pinMode(LED_PIN, OUTPUT);
   dht.begin();
-  pinMode(RELAYPIN, OUTPUT);
-  pinMode(LEDPIN, OUTPUT);
-  digitalWrite(RELAYPIN, LOW); // Aseguramos que el relé esté apagado al inicio
-  digitalWrite(LEDPIN, HIGH);   // Aseguramos que el LED esté apagado al inicio
+  
 }
 
 void loop() {
-  float h = dht.readHumidity();
-  float t = dht.readTemperature();
+  float temperature = dht.readTemperature();
+  float humidity = dht.readHumidity();
 
   delay(1000);
+  
+  if (isnan(temperature) || isnan(humidity)) {
 
-  if (isnan(h) || isnan(t)) {
-    Serial.println("Error al leer del sensor DHT11");
-    sensorError = true;
-    digitalWrite(RELAYPIN, LOW);
-  } else {
-    sensorError = false;
-    Serial.print("Humedad: ");
-    Serial.print(h);
-    Serial.print(" %\t");
-    Serial.print("Temperatura: ");
-    Serial.print(t);
-    Serial.println(" *C");
-  }
-
-  if (sensorError) {
-    // Parpadeo rápido del LED
-    digitalWrite(LEDPIN, LOW);
+    Serial.println("Fallo sensor DHT11");
+    // Si el sensor falla, parpadea el LED rápidamente
+    digitalWrite(LED_PIN, HIGH);
     delay(100);
-    digitalWrite(LEDPIN, HIGH);
+    digitalWrite(LED_PIN, LOW);
     delay(100);
-    digitalWrite(LEDPIN, LOW);
-    delay(100);
-    digitalWrite(LEDPIN, HIGH);
-    delay(100);
-    digitalWrite(LEDPIN, LOW);
-    delay(100);
-    digitalWrite(LEDPIN, HIGH);
-    delay(100);
-    digitalWrite(LEDPIN, LOW);
-    delay(100);
-    digitalWrite(LEDPIN, HIGH);
-    delay(100);
-    digitalWrite(LEDPIN, LOW);
-    delay(100);
-    digitalWrite(LEDPIN, HIGH);
-    delay(100);
-    digitalWrite(LEDPIN, LOW);
-    delay(100);
-    digitalWrite(LEDPIN, HIGH);
-    delay(100);
-    digitalWrite(LEDPIN, LOW);
-    delay(100);
-    digitalWrite(LEDPIN, HIGH);
-    delay(100);
-
-    return;
-  } else {
-    digitalWrite(LEDPIN, HIGH); // Aseguramos que el LED esté apagado si el sensor funciona
-  }
-
-  unsigned long currentMillis = millis();
-
-  if (t >= 30 && !relayOn) {
-    digitalWrite(RELAYPIN, HIGH);
-    Serial.println("El extractor se ha puesto en marcha");
-    previousMillis = currentMillis;
-    relayOn = true;
-  }
-
-  if (relayOn) {
-    unsigned long elapsedMillis = currentMillis - previousMillis;
-    unsigned long remainingMillis = interval - elapsedMillis;
-    int remainingMinutes = remainingMillis / 60000;
-    Serial.print("Minutos restantes para completar el ciclo = ");
-    Serial.println(remainingMinutes);
+    digitalWrite(RELAY_PIN, LOW);
     
-    if (elapsedMillis >= interval && t <= 27) {
-      digitalWrite(RELAYPIN, LOW);
-      Serial.println("El extractor se ha apagado");
-      relayOn = false;
+  } else {
+    // Mostrar temperatura y humedad por serial
+    Serial.print("Temperatura: ");
+    Serial.print(temperature);
+    Serial.print(" °C, Humedad: ");
+    Serial.print(humidity);
+    Serial.println(" %");
+    
+    // Si el sensor vuelve a funcionar, apaga el LED y reinicia la variable
+    digitalWrite(LED_PIN, LOW);
+    
+    if (temperature >= 25) {
+      if (!relayOn) {
+        relayOn = true;
+        relayStartTime = millis();
+        digitalWrite(RELAY_PIN, HIGH);
+      }
+    } else if (temperature <= 24 && relayOn) {
+      unsigned long elapsedTime = (millis() - relayStartTime) / 60000; // Convertir a minutos
+      unsigned long remainingTime = 30 - elapsedTime;
+      Serial.print("Minutos restantes: ");
+      Serial.println(remainingTime);
+      
+      if (elapsedTime >= 30) {
+        relayOn = false;
+        digitalWrite(RELAY_PIN, LOW);
+      }
+    }
+    
+    if (relayOn) {
+      unsigned long elapsedTime = (millis() - relayStartTime) / 60000; // Convertir a minutos
+      unsigned long remainingTime = 30 - elapsedTime;
+      Serial.print("Minutos restantes: ");
+      Serial.println(remainingTime);
+      digitalWrite(RELAY_PIN, HIGH);
+      
+      if (elapsedTime >= 30) {
+        relayOn = false;
+        digitalWrite(RELAY_PIN, LOW);
+      }
     }
   }
 }
