@@ -19,17 +19,19 @@ void setup() {
   pinMode(RELAYPIN, OUTPUT);
   pinMode(LEDPIN, OUTPUT);
   digitalWrite(RELAYPIN, LOW); // Aseguramos que el relé esté apagado al inicio
-  digitalWrite(LEDPIN, LOW);   // Aseguramos que el LED esté apagado al inicio
+  digitalWrite(LEDPIN, HIGH);   // Aseguramos que el LED esté apagado al inicio
 }
 
 void loop() {
   float h = dht.readHumidity();
   float t = dht.readTemperature();
+
   delay(1000);
 
   if (isnan(h) || isnan(t)) {
     Serial.println("Error al leer del sensor DHT11");
     sensorError = true;
+    digitalWrite(RELAYPIN, LOW);
   } else {
     sensorError = false;
     Serial.print("Humedad: ");
@@ -66,6 +68,11 @@ void loop() {
     delay(100);
     digitalWrite(LEDPIN, HIGH);
     delay(100);
+    digitalWrite(LEDPIN, LOW);
+    delay(100);
+    digitalWrite(LEDPIN, HIGH);
+    delay(100);
+
     return;
   } else {
     digitalWrite(LEDPIN, HIGH); // Aseguramos que el LED esté apagado si el sensor funciona
@@ -80,8 +87,14 @@ void loop() {
     relayOn = true;
   }
 
-  if (relayOn && (currentMillis - previousMillis >= interval)) {
-    if (t <= 29) {
+  if (relayOn) {
+    unsigned long elapsedMillis = currentMillis - previousMillis;
+    unsigned long remainingMillis = interval - elapsedMillis;
+    int remainingMinutes = remainingMillis / 60000;
+    Serial.print("Minutos restantes para completar el ciclo = ");
+    Serial.println(remainingMinutes);
+    
+    if (elapsedMillis >= interval && t <= 27) {
       digitalWrite(RELAYPIN, LOW);
       Serial.println("El extractor se ha apagado");
       relayOn = false;
