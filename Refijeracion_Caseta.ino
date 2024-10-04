@@ -29,12 +29,15 @@ void loop() {
   if (isnan(temperature) || isnan(humidity)) {
 
     Serial.println("Fallo sensor DHT11");
-    // Si el sensor falla, parpadea el LED rápidamente
-    digitalWrite(LED_PIN, HIGH);
-    delay(100);
-    digitalWrite(LED_PIN, LOW);
-    delay(100);
     digitalWrite(RELAY_PIN, LOW);
+      {for (int i = 0; i < 100; i++) {
+    digitalWrite(13, HIGH); // Enciende el LED
+    delay(50); // Espera 100 milisegundos
+    digitalWrite(13, LOW); // Apaga el LED
+    delay(50); // Espera 100 milisegundos
+  }
+
+}
     
   } else {
     // Mostrar temperatura y humedad por serial
